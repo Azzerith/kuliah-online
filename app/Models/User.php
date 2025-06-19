@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,34 +11,98 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
+        'nidn_nim',
         'name',
         'email',
         'password',
+        'role',
+        'is_asisten',
+        'profile_photo',
+        'phone'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'is_asisten' => 'boolean'
     ];
+
+    // Relationships
+    public function classes()
+    {
+        return $this->belongsToMany(ClassModel::class, 'class_members')
+            ->withPivot('is_asisten')
+            ->withTimestamps();
+    }
+
+    public function taughtClasses()
+    {
+        return $this->hasMany(ClassModel::class, 'lecturer_id');
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(Assignment::class, 'created_by');
+    }
+
+    public function submissions()
+    {
+        return $this->hasMany(AssignmentSubmission::class, 'student_id');
+    }
+
+    public function answers()
+    {
+        return $this->hasMany(StudentAnswer::class, 'student_id');
+    }
+
+    public function announcements()
+    {
+        return $this->belongsToMany(Announcement::class, 'announcement_recipients')
+            ->withPivot('is_read', 'read_at')
+            ->withTimestamps();
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
+
+    public function todoProgress()
+    {
+        return $this->hasMany(TodoProgress::class, 'student_id');
+    }
+
+    // Scopes
+    public function scopeStudents($query)
+    {
+        return $query->where('role', 'mahasiswa');
+    }
+
+    public function scopeLecturers($query)
+    {
+        return $query->where('role', 'dosen');
+    }
+
+    public function scopeAdmins($query)
+    {
+        return $query->where('role', 'admin');
+    }
+
+    // Methods
+    public function isDosenOrAsistenForClass($class)
+    {
+        return $this->role === 'dosen' || 
+               ($this->role === 'mahasiswa' && $this->is_asisten && 
+                $this->classes()->where('class_id', $class->id)->exists());
+    }
 }
