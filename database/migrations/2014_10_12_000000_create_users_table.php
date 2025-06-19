@@ -9,23 +9,33 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+            $table->string('nidn_nim', 20)->nullable()->comment('NIM untuk mahasiswa, NIDN untuk dosen');
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['admin', 'dosen', 'mahasiswa']);
+            $table->boolean('is_asisten')->default(false);
+            $table->string('profile_photo')->nullable();
+            $table->string('phone', 20)->nullable();
             $table->rememberToken();
             $table->timestamps();
+            
+            // Indexes
+            $table->index('nidn_nim');
+            $table->index('role');
+            $table->index('is_asisten');
         });
     }
 
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('users');
     }
