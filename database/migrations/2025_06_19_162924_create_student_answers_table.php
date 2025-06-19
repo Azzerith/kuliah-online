@@ -6,21 +6,26 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('student_answers', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('assignment_id')->constrained('assignments');
+            $table->foreignId('question_id')->constrained('assignment_questions');
+            $table->foreignId('student_id')->constrained('users');
+            $table->text('answer')->nullable();
+            $table->string('file_path')->nullable();
+            $table->decimal('score', 5, 2)->nullable();
+            $table->foreignId('corrected_by')->nullable()->constrained('users');
+            $table->text('feedback')->nullable();
+            $table->timestamp('submitted_at')->nullable();
+            $table->timestamp('corrected_at')->nullable();
+            
+            $table->unique(['assignment_id', 'question_id', 'student_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('student_answers');
     }

@@ -6,21 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('assignment_questions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('assignment_id')->constrained('assignments');
+            $table->text('question');
+            $table->integer('question_order');
+            $table->text('answer_key')->nullable();
+            $table->decimal('points', 5, 2);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('assignment_questions');
     }

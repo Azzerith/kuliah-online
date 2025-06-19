@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
     {
         Schema::create('users', function (Blueprint $table) {
@@ -25,16 +22,12 @@ return new class extends Migration
             $table->rememberToken();
             $table->timestamps();
             
-            // Indexes
             $table->index('nidn_nim');
             $table->index('role');
             $table->index('is_asisten');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down()
     {
         Schema::dropIfExists('users');

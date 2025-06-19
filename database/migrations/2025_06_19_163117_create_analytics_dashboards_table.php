@@ -6,21 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('analytics_dashboards', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('class_id')->constrained('classes');
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->json('config');
+            $table->foreignId('created_by')->constrained('users');
+            $table->boolean('is_public')->default(false);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('analytics_dashboards');
     }

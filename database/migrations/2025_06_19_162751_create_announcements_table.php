@@ -6,21 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('announcements', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('class_id')->nullable()->constrained('classes');
+            $table->string('title');
+            $table->text('content');
+            $table->foreignId('created_by')->constrained('users');
+            $table->boolean('is_pinned')->default(false);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('announcements');
     }

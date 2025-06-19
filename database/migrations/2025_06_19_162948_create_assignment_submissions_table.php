@@ -6,21 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('assignment_submissions', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('assignment_id')->constrained('assignments');
+            $table->foreignId('student_id')->constrained('users');
+            $table->decimal('total_score', 5, 2)->nullable();
+            $table->enum('submission_status', ['not_submitted', 'draft', 'submitted', 'late', 'graded'])->default('not_submitted');
+            $table->timestamp('submitted_at')->nullable();
+            $table->timestamp('graded_at')->nullable();
+            
+            $table->unique(['assignment_id', 'student_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('assignment_submissions');
     }

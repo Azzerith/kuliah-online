@@ -6,21 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('todo_progress', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('todo_id')->constrained('todo_lists');
+            $table->foreignId('student_id')->constrained('users');
+            $table->enum('status', ['not_started', 'in_progress', 'completed'])->default('not_started');
+            $table->text('notes')->nullable();
+            $table->timestamp('completed_at')->nullable();
+            $table->foreignId('verified_by')->nullable()->constrained('users');
+            $table->timestamp('verified_at')->nullable();
+            
+            $table->unique(['todo_id', 'student_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('todo_progress');
     }

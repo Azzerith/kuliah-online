@@ -6,21 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('class_members', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('class_id')->constrained('classes');
+            $table->foreignId('user_id')->constrained('users');
+            $table->boolean('is_asisten')->default(false);
             $table->timestamps();
+            
+            $table->unique(['class_id', 'user_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('class_members');
     }

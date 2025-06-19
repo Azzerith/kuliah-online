@@ -6,21 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('verification_codes', function (Blueprint $table) {
             $table->id();
+            $table->string('code', 6);
+            $table->timestamp('expires_at');
+            $table->integer('max_usage')->default(1);
+            $table->integer('current_usage')->default(0);
+            $table->foreignId('created_by')->nullable()->constrained('users');
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('verification_codes');
     }
