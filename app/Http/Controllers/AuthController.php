@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\VerificationCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -11,44 +10,33 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     public function register(Request $request)
-    {
-        $validated = $request->validate([
-            'nidn_nim' => 'required|string|max:20|unique:users',
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:admin,dosen,mahasiswa',
-            'verification_code' => 'required|string|size:6'
-        ]);
+{
+    $validated = $request->validate([
+        'nidn_nim' => 'required|string|max:20|unique:users',
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:8|confirmed',
+        'role' => 'required|in:admin,dosen,mahasiswa'
+    ]);
 
-        // Verify the code
-        $verificationCode = VerificationCode::where('code', $validated['verification_code'])
-            ->where('expires_at', '>', now())
-            ->where('current_usage', '<', 'max_usage')
-            ->first();
+    $user = User::create([
+        'nidn_nim' => $validated['nidn_nim'],
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']),
+        'role' => $validated['role'],
+        'status' => 'non-aktif' // Default non-aktif, harus diaktifkan oleh admin
+    ]);
 
-        if (!$verificationCode) {
-            throw ValidationException::withMessages([
-                'verification_code' => ['Kode verifikasi tidak valid atau sudah kadaluarsa.'],
-            ]);
-        }
+    // Notifikasi ke admin (opsional)
+    // $admin = User::where('role', 'admin')->first();
+    // $admin->notify(new NewUserRegistrationNotification($user));
 
-        // Update code usage
-        $verificationCode->increment('current_usage');
-
-        $user = User::create([
-            'nidn_nim' => $validated['nidn_nim'],
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
-        ]);
-
-        return response()->json([
-            'message' => 'Registrasi berhasil',
-            'user' => $user
-        ], 201);
-    }
+    return response()->json([
+        'message' => 'Registrasi berhasil. Akun Anda sedang menunggu persetujuan admin.',
+        'user' => $user->makeHidden(['password']) // Sembunyikan password di response
+    ], 201);
+}
 
     public function login(Request $request)
     {

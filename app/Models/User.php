@@ -19,7 +19,8 @@ class User extends Authenticatable
         'role',
         'is_asisten',
         'profile_photo',
-        'phone'
+        'phone',
+        'status'
     ];
 
     protected $hidden = [
@@ -30,6 +31,10 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_asisten' => 'boolean'
+    ];
+
+    protected $attributes = [
+        'status' => 'non-aktif'
     ];
 
     // Relationships
